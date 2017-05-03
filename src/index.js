@@ -21,6 +21,8 @@ client.on('message', (type, data) => {
   if (type === client.type_ids.TYPE_ID_POST) {
     const group = data.group_id
     db[group] = db[group] || {}
+
+    // app list
     if (data.text === 'app list') {
       const apps = Object.keys(db[group]).map((app) => {
         return {
@@ -32,8 +34,19 @@ client.on('message', (type, data) => {
       client.post(group, message)
       return
     }
-    if (data.text === 'app add') {
-      client.post(group, 'app added')
+
+    // app add
+    const match = data.text.match(/^app add ([a-z0-9]+)$/)
+    if (match !== null) {
+      const app = RINGCENTRAL_APPS[match[1]] || match[1]
+      db[group][app] = {}
+
+      client.post(group, app)
+      return
+    }
+
+    if (1 === 1) {
+
     }
   }
 })
