@@ -1,9 +1,9 @@
 require('dotenv').config()
 const path = require('path')
 const fs = require('fs')
-const GlipSocket = require('glip.socket.io')
 const { engine } = require('./nunjucks')
 const { getReviews } = require('./spider')
+const client = require('./glip')
 
 const RINGCENTRAL_APPS = {
   glip: 715886894,
@@ -12,13 +12,6 @@ const RINGCENTRAL_APPS = {
 }
 
 const db = JSON.parse(fs.readFileSync(path.join(__dirname, '../db.json')))
-
-const client = new GlipSocket({
-  host: process.env.GLIP_HOST,
-  port: process.env.GLIP_PORT,
-  user: process.env.GLIP_EMAIL,
-  password: process.env.GLIP_PASSWORD
-})
 
 client.on('message', async (type, data) => {
   if (type === client.type_ids.TYPE_ID_POST) {
@@ -93,5 +86,3 @@ client.on('message', async (type, data) => {
     }
   }
 })
-
-client.start()
