@@ -9,7 +9,7 @@ const client = new GlipSocket({
 })
 
 client.on('message', (type, data) => {
-  if (type === this.client.type_ids.TYPE_ID_POST && data.text === 'ping') {
+  if (type === client.type_ids.TYPE_ID_POST && data.text === 'ping') {
     client.post(data.group_id, 'pong')
   }
 })
