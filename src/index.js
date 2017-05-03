@@ -1,9 +1,10 @@
 require('dotenv').config()
-const path = require('path')
-const fs = require('fs')
 const { engine } = require('./nunjucks')
 const { getReviews } = require('./spider')
 const client = require('./glip')
+const { CronJob } = require('cron')
+const { compareReviews } = require('./util')
+const { loadDb, saveDb } = require('./db')
 
 const RINGCENTRAL_APPS = {
   glip: 715886894,
@@ -11,7 +12,40 @@ const RINGCENTRAL_APPS = {
   meetings: 688920955
 }
 
-const db = JSON.parse(fs.readFileSync(path.join(__dirname, '../db.json')))
+const db = loadDb()
+
+const monitors = {}
+const notifyReview = (group, app, number, isNew) => {
+  const entry = db[group][app].reviews[number - 1]
+  const review = {
+    id: entry.id.label,
+    title: entry.title.label.trim(),
+    stars: parseInt(entry['im:rating'].label.trim()),
+    content: entry.content.label.split('\n').map((line) => '> ' + line).join('\n'),
+    author: entry.author.name.label
+  }
+  const message = engine.render('review.njk', { number, review, name: db[group][app].name, new: isNew })
+  client.post(group, message)
+}
+const cronJob = async (group, app) => {
+  let reviews = await getReviews(app)
+  reviews = reviews.slice(1)
+  const delta = compareReviews(db[group][app].reviews, reviews)
+  db[group][app].reviews = reviews
+  delta.forEach((number) => {
+    notifyReview(group, app, number, true)
+  })
+  saveDb(db)
+}
+Object.keys(db).forEach((group) => {
+  monitors[group] = {}
+  Object.keys(db[group]).forEach((app) => {
+    monitors[group][app] = new CronJob('0 */10 * * * *', (group, app) => {
+      cronJob(group, app)
+    })
+    monitors[group][app].start()
+  })
+})
 
 client.on('message', async (type, data) => {
   if (type === client.type_ids.TYPE_ID_POST) {
@@ -39,7 +73,7 @@ client.on('message', async (type, data) => {
       const name = reviews[0]['im:name'].label
       db[group][app] = { name, reviews: reviews.slice(1) }
       client.post(group, name)
-      fs.writeFileSync(path.join(__dirname, '../db.json'), JSON.stringify(db))
+      saveDb(db)
       return
     }
 
@@ -48,7 +82,7 @@ client.on('message', async (type, data) => {
     if (match !== null) {
       const app = RINGCENTRAL_APPS[match[1]] || match[1]
       delete db[group][app]
-      fs.writeFileSync(path.join(__dirname, '../db.json'), JSON.stringify(db))
+      saveDb(db)
       return
     }
 
@@ -73,16 +107,7 @@ client.on('message', async (type, data) => {
     if (match !== null) {
       const app = RINGCENTRAL_APPS[match[1]] || match[1]
       const number = parseInt(match[2])
-      const entry = db[group][app].reviews[number - 1]
-      const review = {
-        id: entry.id.label,
-        title: entry.title.label.trim(),
-        stars: parseInt(entry['im:rating'].label.trim()),
-        content: entry.content.label.split('\n').map((line) => '> ' + line).join('\n'),
-        author: entry.author.name.label
-      }
-      const message = engine.render('review.njk', { number, review, name: db[group][app].name })
-      client.post(group, message)
+      notifyReview(group, app, number, false)
     }
   }
 })

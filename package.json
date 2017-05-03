@@ -10,6 +10,7 @@
   "author": "Tyler Long <tyler4long@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "cron": "^1.2.1",
     "dotenv": "^4.0.0",
     "glip.socket.io": "tylerlong/glip.socket.io",
     "nunjucks": "^3.0.0",
