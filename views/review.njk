@@ -1,0 +1,7 @@
+{% if new %}New{% else %}#{{ number }}{% endif %} app review for "**{{ name }}**"
+
+{% include 'stars.njk' %} - {{ review.title }}
+
+by {% include 'author.njk' %} - ID: {{ review.id }}
+
+{{ review.content }}

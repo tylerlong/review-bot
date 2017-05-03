@@ -1,4 +1,5 @@
 require('dotenv').config()
+const fs = require('fs')
 const GlipSocket = require('glip.socket.io')
 const { engine } = require('./nunjucks')
 const { getReviews } = require('./spider')
@@ -9,7 +10,7 @@ const RINGCENTRAL_APPS = {
   meetings: 688920955
 }
 
-const db = {}
+const db = JSON.parse(fs.readFileSync('../db.json'))
 
 const client = new GlipSocket({
   host: process.env.GLIP_HOST,
@@ -44,6 +45,7 @@ client.on('message', async (type, data) => {
       const name = reviews[0]['im:name'].label
       db[group][app] = { name, reviews: reviews.slice(1) }
       client.post(group, name)
+      fs.writeFileSync('../db.json', JSON.stringify(db))
       return
     }
 
@@ -52,6 +54,7 @@ client.on('message', async (type, data) => {
     if (match !== null) {
       const app = RINGCENTRAL_APPS[match[1]] || match[1]
       delete db[group][app]
+      fs.writeFileSync('../db.json', JSON.stringify(db))
       return
     }
 
@@ -71,8 +74,21 @@ client.on('message', async (type, data) => {
       return
     }
 
-    if (1 === 1) {
-
+    // app review
+    match = data.text.match(/^app ([a-z0-9]+) review (\d+)$/)
+    if (match !== null) {
+      const app = RINGCENTRAL_APPS[match[1]] || match[1]
+      const number = parseInt(match[2])
+      const entry = db[group][app].reviews[number - 1]
+      const review = {
+        id: entry.id.label,
+        title: entry.title.label.trim(),
+        stars: parseInt(entry['im:rating'].label.trim()),
+        content: entry.content.label.split('\n').map((line) => '> ' + line).join('\n'),
+        author: entry.author.name.label
+      }
+      const message = engine.render('review.njk', { number, review, name: db[group][app].name })
+      client.post(group, message)
     }
   }
 })
