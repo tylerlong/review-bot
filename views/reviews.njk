@@ -1,0 +1,9 @@
+**{{ name }}**
+
+{% if reviews|length %}
+{% for review in reviews %}
+#{{ loop.index }} - {% include 'stars.njk' %} - {% include 'author.njk' %} - {{ review.title }}
+{% endfor %}
+{% else %}
+There are no reviews for the app.
+{% endif %}

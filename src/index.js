@@ -55,6 +55,22 @@ client.on('message', async (type, data) => {
       return
     }
 
+    // app reviews
+    match = data.text.match(/^app ([a-z0-9]+) reviews$/)
+    if (match !== null) {
+      const app = RINGCENTRAL_APPS[match[1]] || match[1]
+      const reviews = db[group][app].reviews.map((review) => {
+        return {
+          title: review.title.label.trim(),
+          stars: parseInt(review['im:rating'].label.trim()),
+          author: review.author.name.label
+        }
+      })
+      const message = engine.render('reviews.njk', { reviews, name: db[group][app].name })
+      client.post(group, message)
+      return
+    }
+
     if (1 === 1) {
 
     }
