@@ -11,7 +11,8 @@
   "license": "MIT",
   "dependencies": {
     "dotenv": "^4.0.0",
-    "glip.socket.io": "tylerlong/glip.socket.io"
+    "glip.socket.io": "tylerlong/glip.socket.io",
+    "nunjucks": "^3.0.0"
   },
   "devDependencies": {
     "standard": "^10.0.2"
