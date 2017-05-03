@@ -1,4 +1,5 @@
 require('dotenv').config()
+const path = require('path')
 const fs = require('fs')
 const GlipSocket = require('glip.socket.io')
 const { engine } = require('./nunjucks')
@@ -10,7 +11,7 @@ const RINGCENTRAL_APPS = {
   meetings: 688920955
 }
 
-const db = JSON.parse(fs.readFileSync('../db.json'))
+const db = JSON.parse(fs.readFileSync(path.join(__dirname, '../db.json')))
 
 const client = new GlipSocket({
   host: process.env.GLIP_HOST,
@@ -45,7 +46,7 @@ client.on('message', async (type, data) => {
       const name = reviews[0]['im:name'].label
       db[group][app] = { name, reviews: reviews.slice(1) }
       client.post(group, name)
-      fs.writeFileSync('../db.json', JSON.stringify(db))
+      fs.writeFileSync(path.join(__dirname, '../db.json'), JSON.stringify(db))
       return
     }
 
@@ -54,7 +55,7 @@ client.on('message', async (type, data) => {
     if (match !== null) {
       const app = RINGCENTRAL_APPS[match[1]] || match[1]
       delete db[group][app]
-      fs.writeFileSync('../db.json', JSON.stringify(db))
+      fs.writeFileSync(path.join(__dirname, '../db.json'), JSON.stringify(db))
       return
     }
 
