@@ -40,7 +40,7 @@ const cronJob = async (group, app) => {
 Object.keys(db).forEach((group) => {
   monitors[group] = {}
   Object.keys(db[group]).forEach((app) => {
-    monitors[group][app] = new CronJob('0 */10 * * * *', (group, app) => {
+    monitors[group][app] = new CronJob('0 */10 * * * *', () => {
       cronJob(group, app)
     })
     monitors[group][app].start()
@@ -72,7 +72,11 @@ client.on('message', async (type, data) => {
       const reviews = await getReviews(app)
       const name = reviews[0]['im:name'].label
       db[group][app] = { name, reviews: reviews.slice(1) }
-      client.post(group, name)
+      monitors[group][app] = new CronJob('0 */10 * * * *', () => {
+        cronJob(group, app)
+      })
+      monitors[group][app].start()
+      client.post(group, 'done')
       saveDb(db)
       return
     }
@@ -82,6 +86,9 @@ client.on('message', async (type, data) => {
     if (match !== null) {
       const app = RINGCENTRAL_APPS[match[1]] || match[1]
       delete db[group][app]
+      monitors[group][app].stop()
+      delete monitors[group][app]
+      client.post(group, 'done')
       saveDb(db)
       return
     }
