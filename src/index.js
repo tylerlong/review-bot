@@ -1,6 +1,7 @@
 require('dotenv').config()
 const GlipSocket = require('glip.socket.io')
 const { engine } = require('./nunjucks')
+const { getReviews } = require('./spider')
 
 const RINGCENTRAL_APPS = {
   glip: 715886894,
@@ -17,7 +18,7 @@ const client = new GlipSocket({
   password: process.env.GLIP_PASSWORD
 })
 
-client.on('message', (type, data) => {
+client.on('message', async (type, data) => {
   if (type === client.type_ids.TYPE_ID_POST) {
     const group = data.group_id
     db[group] = db[group] || {}
@@ -36,12 +37,21 @@ client.on('message', (type, data) => {
     }
 
     // app add
-    const match = data.text.match(/^app add ([a-z0-9]+)$/)
+    let match = data.text.match(/^app add ([a-z0-9]+)$/)
     if (match !== null) {
       const app = RINGCENTRAL_APPS[match[1]] || match[1]
-      db[group][app] = {}
+      const reviews = await getReviews(app)
+      const name = reviews[0]['im:name'].label
+      db[group][app] = { name, reviews: reviews.slice(1) }
+      client.post(group, name)
+      return
+    }
 
-      client.post(group, app)
+    // app remove
+    match = data.text.match(/^app remove ([a-z0-9]+)$/)
+    if (match !== null) {
+      const app = RINGCENTRAL_APPS[match[1]] || match[1]
+      delete db[group][app]
       return
     }
 
