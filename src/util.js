@@ -5,7 +5,7 @@ const compareReviews = (old, now) => {
     if (old.find((review) => { return review.id.label === id })) {
       break
     }
-    delta.push(id + 1)
+    delta.push(i + 1)
   }
   return delta
 }
