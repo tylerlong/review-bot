@@ -73,6 +73,10 @@ client.on('message', async (type, data) => {
       const name = reviews[0]['im:name'].label
       db[group][app] = { name, reviews: reviews.slice(1) }
       monitors[group] = monitors[group] || {}
+      if (monitors[group][app]) {
+        monitors[group][app].stop()
+        delete monitors[group][app]
+      }
       monitors[group][app] = new CronJob('0 */10 * * * *', () => {
         cronJob(group, app)
       })
