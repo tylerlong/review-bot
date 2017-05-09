@@ -3,7 +3,7 @@ const { engine } = require('./nunjucks')
 const { getReviews } = require('./spider')
 const client = require('./glip')
 const { CronJob } = require('cron')
-const { compareReviews } = require('./util')
+const { compareReviews, mergeReviews } = require('./util')
 const { loadDb, saveDb } = require('./db')
 
 const RINGCENTRAL_APPS = {
@@ -31,7 +31,7 @@ const cronJob = async (group, app) => {
   let reviews = await getReviews(app)
   reviews = reviews.slice(1)
   const delta = compareReviews(db[group][app].reviews, reviews)
-  db[group][app].reviews = reviews
+  db[group][app].reviews = mergeReviews(db[group][app].reviews, reviews)
   delta.forEach((number) => {
     notifyReview(group, app, number, true)
   })
