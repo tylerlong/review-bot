@@ -25,7 +25,7 @@ const notifyReview = (group, app, number, isNew) => {
     author: entry.author.name.label
   }
   const message = engine.render('review.njk', { number, review, name: db[group][app].name, new: isNew })
-  client.post(group, message)
+  client.post(parseInt(group), message)
 }
 const cronJob = async (group, app) => {
   let reviews = await getReviews(app)
