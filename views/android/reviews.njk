@@ -1,8 +1,8 @@
-**{{ name }}**
+**[{{ name }}](https://play.google.com/store/apps/details?id={{ name }})**
 
 {% if reviews|length %}
 {% for review in reviews %}
-#{{ loop.index }} - {% include 'common/stars.njk' %} - {{ review.device }} - {{ review.title }}
+#{{ loop.index }} - {% include 'common/stars.njk' %} - {{ review.author }} - {{ review.title }} - {{ review.device }}
 {% endfor %}
 {% else %}
 There are no reviews for this Andriod app.

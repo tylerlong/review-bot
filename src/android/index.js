@@ -17,12 +17,13 @@ const db = loadDb()
 const monitors = {}
 const notifyReview = (group, app, number, isNew) => {
   const entry = db[group][app].reviews[number - 1]
-  const deviceMetadata = entry.comments[0].deviceMetadata
-  const device = `${deviceMetadata.manufacturer} ${deviceMetadata.productName}`
+  const deviceMetadata = entry.comments[0].userComment.deviceMetadata
+  const device = deviceMetadata ? `${deviceMetadata.manufacturer} ${deviceMetadata.productName}` : 'Unknown device'
   const review = {
     text: entry.comments[0].userComment.text.trim(),
     stars: entry.comments[0].userComment.starRating,
-    device
+    device,
+    author: entry.authorName === '' ? 'Unknown user' : entry.authorName
   }
   const message = engine.render('android/review.njk', { number, review, name: db[group][app].name, new: isNew })
   client.post(parseInt(group), message)
@@ -105,12 +106,13 @@ client.on('message', async (type, data) => {
   if (match !== null) {
     const app = RINGCENTRAL_APPS[match[1]] || match[1]
     const reviews = db[group][app].reviews.map((review) => {
-      const deviceMetadata = review.comments[0].deviceMetadata
-      const device = `${deviceMetadata.manufacturer} ${deviceMetadata.productName}`
+      const deviceMetadata = review.comments[0].userComment.deviceMetadata
+      const device = deviceMetadata ? `${deviceMetadata.manufacturer} ${deviceMetadata.productName}` : 'Unknown device'
       return {
-        title: review.comments[0].userComment.text.trim().substring(0, 16) + '...',
+        title: review.comments[0].userComment.text.trim().substring(0, 40) + '...',
         stars: review.comments[0].userComment.starRating,
-        device
+        device,
+        author: review.authorName === '' ? 'Unknown user' : review.authorName
       }
     })
     const message = engine.render('android/reviews.njk', { reviews, name: db[group][app].name })
