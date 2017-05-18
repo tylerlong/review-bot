@@ -1,3 +1,5 @@
 node_modules/
 .env
 db.json
+key.json
+db/*.json
