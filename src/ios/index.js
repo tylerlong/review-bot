@@ -1,8 +1,9 @@
 require('dotenv').config()
+const { CronJob } = require('cron')
+
+const client = require('../common/glip')
 const engine = require('./nunjucks')
 const { getReviews } = require('./spider')
-const client = require('../common/glip')
-const { CronJob } = require('cron')
 const { compareReviews, mergeReviews } = require('./util')
 const { loadDb, saveDb } = require('./db')
 
@@ -18,7 +19,6 @@ const monitors = {}
 const notifyReview = (group, app, number, isNew) => {
   const entry = db[group][app].reviews[number - 1]
   const review = {
-    id: entry.id.label,
     title: entry.title.label.trim(),
     stars: parseInt(entry['im:rating'].label.trim()),
     content: entry.content.label.split('\n').map((line) => '> ' + line).join('\n'),
