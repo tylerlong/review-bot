@@ -19,3 +19,8 @@ edit .env
 ```
 yarn start
 ```
+
+
+## Todo
+
+- Write tests!

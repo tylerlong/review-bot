@@ -1,7 +1,7 @@
 {% if new %}New{% else %}#{{ number }}{% endif %} app review for "**{{ name }}**"
 
-{% include 'stars.njk' %} - {{ review.title }}
+{% include 'common/stars.njk' %} - {{ review.title }}
 
-by {% include 'author.njk' %}
+by {% include 'ios/author.njk' %}
 
 {{ review.content }}
