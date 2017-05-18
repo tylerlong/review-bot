@@ -2,6 +2,8 @@
 
 Glip bot to monitor app reviews.
 
+Both iOS App Store and Google Play store are supported.
+
 
 ## Setup
 
@@ -9,8 +11,8 @@ Glip bot to monitor app reviews.
 yarn install
 cp .env.sample .env
 edit .env
-cp db.json.sample db.json
 ```
+
 
 ## Run
 
