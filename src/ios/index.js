@@ -2,7 +2,7 @@ require('dotenv').config()
 const { CronJob } = require('cron')
 
 const client = require('../common/glip')
-const engine = require('./nunjucks')
+const engine = require('../common/nunjucks')
 const { getReviews } = require('./spider')
 const { compareReviews, mergeReviews } = require('./util')
 const { loadDb, saveDb } = require('./db')
@@ -24,7 +24,7 @@ const notifyReview = (group, app, number, isNew) => {
     content: entry.content.label.split('\n').map((line) => '> ' + line).join('\n'),
     author: entry.author.name.label
   }
-  const message = engine.render('review.njk', { number, review, name: db[group][app].name, new: isNew })
+  const message = engine.render('ios/review.njk', { number, review, name: db[group][app].name, new: isNew })
   client.post(parseInt(group), message)
 }
 const cronJob = async (group, app) => {
@@ -63,7 +63,7 @@ client.on('message', async (type, data) => {
         name: db[group][app].name
       }
     })
-    const message = engine.render('apps.njk', { apps })
+    const message = engine.render('ios/apps.njk', { apps })
     client.post(group, message)
     return
   }
@@ -112,7 +112,7 @@ client.on('message', async (type, data) => {
         author: review.author.name.label
       }
     })
-    const message = engine.render('reviews.njk', { reviews, name: db[group][app].name })
+    const message = engine.render('ios/reviews.njk', { reviews, name: db[group][app].name })
     client.post(group, message)
     return
   }
