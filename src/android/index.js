@@ -1,6 +1,6 @@
 const client = require('../common/glip')
-
 const { loadDb, saveDb } = require('./db')
+const { getReviews } = require('./spider')
 
 const RINGCENTRAL_APPS = {
   glip: 'com.glip.mobile',
@@ -20,6 +20,11 @@ client.on('message', async (type, data) => {
 
   // android list
   if (data.text === 'android list') {
+    const reviews1 = await getReviews('com.ringcentral.android')
+    console.log(JSON.stringify(reviews1))
+    console.log('==============')
+    const reviews2 = await getReviews('com.ringcentral.meetings')
+    console.log(JSON.stringify(reviews2))
     return
   }
 
