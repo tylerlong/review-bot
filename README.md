@@ -11,6 +11,8 @@ Both iOS App Store and Google Play store are supported.
 yarn install
 cp .env.sample .env
 edit .env
+
+Save your Google service account credentials into `src/android/key.json`.
 ```
 
 
@@ -24,3 +26,4 @@ yarn start
 ## Todo
 
 - Write tests!
+- catch exceptions, such as index out of array.

@@ -1,11 +1,10 @@
-require('dotenv').config()
 const { CronJob } = require('cron')
 
 const client = require('../common/glip')
 const engine = require('../common/nunjucks')
+const { loadDb, saveDb } = require('./db')
 const { getReviews } = require('./spider')
 const { compareReviews, mergeReviews } = require('./util')
-const { loadDb, saveDb } = require('./db')
 
 const RINGCENTRAL_APPS = {
   glip: 715886894,
@@ -75,6 +74,7 @@ client.on('message', async (type, data) => {
     const reviews = await getReviews(app)
     const name = reviews[0]['im:name'].label
     db[group][app] = { name, reviews: reviews.slice(1) }
+
     monitors[group] = monitors[group] || {}
     if (monitors[group][app]) {
       monitors[group][app].stop()
@@ -84,6 +84,7 @@ client.on('message', async (type, data) => {
       cronJob(group, app)
     })
     monitors[group][app].start()
+
     client.post(group, 'done')
     saveDb(db)
     return

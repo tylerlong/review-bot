@@ -1,6 +1,10 @@
+const { CronJob } = require('cron')
+
 const client = require('../common/glip')
+const engine = require('../common/nunjucks')
 const { loadDb, saveDb } = require('./db')
 const { getReviews } = require('./spider')
+const { compareReviews } = require('./util')
 
 const RINGCENTRAL_APPS = {
   glip: 'com.glip.mobile',
@@ -9,6 +13,38 @@ const RINGCENTRAL_APPS = {
 }
 
 const db = loadDb()
+
+const monitors = {}
+const notifyReview = (group, app, number, isNew) => {
+  const entry = db[group][app].reviews[number - 1]
+  const deviceMetadata = entry.comments[0].deviceMetadata
+  const device = `${deviceMetadata.manufacturer} ${deviceMetadata.productName}`
+  const review = {
+    text: entry.comments[0].userComment.text.trim(),
+    stars: entry.comments[0].userComment.starRating,
+    device
+  }
+  const message = engine.render('android/review.njk', { number, review, name: db[group][app].name, new: isNew })
+  client.post(parseInt(group), message)
+}
+const cronJob = async (group, app) => {
+  let reviews = await getReviews(app)
+  const delta = compareReviews(db[group][app].reviews, reviews)
+  db[group][app].reviews = reviews
+  delta.forEach((number) => {
+    notifyReview(group, app, number, true)
+  })
+  saveDb(db)
+}
+Object.keys(db).forEach((group) => {
+  monitors[group] = {}
+  Object.keys(db[group]).forEach((app) => {
+    monitors[group][app] = new CronJob('0 */10 * * * *', () => {
+      cronJob(group, app)
+    })
+    monitors[group][app].start()
+  })
+})
 
 client.on('message', async (type, data) => {
   if (type !== client.type_ids.TYPE_ID_POST) {
@@ -20,36 +56,73 @@ client.on('message', async (type, data) => {
 
   // android list
   if (data.text === 'android list') {
-    const reviews1 = await getReviews('com.ringcentral.android')
-    console.log(JSON.stringify(reviews1))
-    console.log('==============')
-    const reviews2 = await getReviews('com.ringcentral.meetings')
-    console.log(JSON.stringify(reviews2))
+    const apps = Object.keys(db[group]).map((app) => {
+      return {
+        name: db[group][app].name
+      }
+    })
+    const message = engine.render('android/apps.njk', { apps })
+    client.post(group, message)
     return
   }
 
   // android add
-  let match = data.text.match(/^android add ([a-z0-9]+)$/)
+  let match = data.text.match(/^android add ([a-z0-9.]+)$/)
   if (match !== null) {
+    const app = RINGCENTRAL_APPS[match[1]] || match[1]
+    const reviews = await getReviews(app)
+    db[group][app] = { name: app, reviews }
+
+    monitors[group] = monitors[group] || {}
+    if (monitors[group][app]) {
+      monitors[group][app].stop()
+      delete monitors[group][app]
+    }
+    monitors[group][app] = new CronJob('0 */10 * * * *', () => {
+      cronJob(group, app)
+    })
+    monitors[group][app].start()
+
+    client.post(group, 'done')
     saveDb(db)
     return
   }
 
   // android remove
-  match = data.text.match(/^android remove ([a-z0-9]+)$/)
+  match = data.text.match(/^android remove ([a-z0-9.]+)$/)
   if (match !== null) {
+    const app = RINGCENTRAL_APPS[match[1]] || match[1]
+    delete db[group][app]
+    monitors[group][app].stop()
+    delete monitors[group][app]
+    client.post(group, 'done')
     saveDb(db)
     return
   }
 
   // android reviews
-  match = data.text.match(/^android ([a-z0-9]+) reviews$/)
+  match = data.text.match(/^android ([a-z0-9.]+) reviews$/)
   if (match !== null) {
+    const app = RINGCENTRAL_APPS[match[1]] || match[1]
+    const reviews = db[group][app].reviews.map((review) => {
+      const deviceMetadata = review.comments[0].deviceMetadata
+      const device = `${deviceMetadata.manufacturer} ${deviceMetadata.productName}`
+      return {
+        title: review.comments[0].userComment.text.trim().substring(0, 16) + '...',
+        stars: review.comments[0].userComment.starRating,
+        device
+      }
+    })
+    const message = engine.render('android/reviews.njk', { reviews, name: db[group][app].name })
+    client.post(group, message)
     return
   }
 
   // android review
-  match = data.text.match(/^android ([a-z0-9]+) review (\d+)$/)
+  match = data.text.match(/^android ([a-z0-9.]+) review (\d+)$/)
   if (match !== null) {
+    const app = RINGCENTRAL_APPS[match[1]] || match[1]
+    const number = parseInt(match[2])
+    notifyReview(group, app, number, false)
   }
 })
