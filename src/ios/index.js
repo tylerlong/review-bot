@@ -1,10 +1,10 @@
 require('dotenv').config()
-const { engine } = require('../nunjucks')
+const engine = require('./nunjucks')
 const { getReviews } = require('./spider')
-const client = require('../glip')
+const client = require('../common/glip')
 const { CronJob } = require('cron')
 const { compareReviews, mergeReviews } = require('./util')
-const { loadDb, saveDb } = require('../db')
+const { loadDb, saveDb } = require('../common/db')
 
 const RINGCENTRAL_APPS = {
   glip: 715886894,

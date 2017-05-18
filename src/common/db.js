@@ -2,7 +2,7 @@ const path = require('path')
 const fs = require('fs')
 
 const loadDb = (dbName = 'ios') => {
-  const dbPath = path.join(__dirname, `../db/${dbName}.json`)
+  const dbPath = path.join(__dirname, `../../db/${dbName}.json`)
   if (!fs.existsSyncdbPath) {
     fs.writeFileSync(dbPath, '{}')
   }
@@ -10,7 +10,7 @@ const loadDb = (dbName = 'ios') => {
 }
 
 const saveDb = (db, dbName = 'ios') => {
-  const dbPath = path.join(__dirname, `../db/${dbName}.json`)
+  const dbPath = path.join(__dirname, `../../db/${dbName}.json`)
   fs.writeFileSync(dbPath, JSON.stringify(db))
 }
 
