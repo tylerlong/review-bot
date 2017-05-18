@@ -4,7 +4,8 @@
   "description": "Glip bot to monitor app reviews.",
   "main": "index.js",
   "scripts": {
-    "start": "node src/index.js"
+    "start": "node src/index.js",
+    "upgrade": "ncu -ua && yarn upgrade"
   },
   "repository": "git@github.com:tylerlong/review-bot.git",
   "author": "Tyler Long <tyler4long@gmail.com>",
@@ -15,9 +16,10 @@
     "glip.socket.io": "tylerlong/glip.socket.io",
     "nunjucks": "^3.0.0",
     "request": "^2.81.0",
-    "request-promise": "^4.2.0"
+    "request-promise": "^4.2.1"
   },
   "devDependencies": {
+    "npm-check-updates": "^2.11.1",
     "standard": "^10.0.2"
   }
 }
