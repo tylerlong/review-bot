@@ -4,7 +4,7 @@ const { getReviews } = require('./spider')
 const client = require('../common/glip')
 const { CronJob } = require('cron')
 const { compareReviews, mergeReviews } = require('./util')
-const { loadDb, saveDb } = require('../common/db')
+const { loadDb, saveDb } = require('./db')
 
 const RINGCENTRAL_APPS = {
   glip: 715886894,
@@ -48,78 +48,80 @@ Object.keys(db).forEach((group) => {
 })
 
 client.on('message', async (type, data) => {
-  if (type === client.type_ids.TYPE_ID_POST) {
-    const group = data.group_id
-    db[group] = db[group] || {}
+  if (type !== client.type_ids.TYPE_ID_POST) {
+    return
+  }
 
-    // ios list
-    if (data.text === 'ios list') {
-      const apps = Object.keys(db[group]).map((app) => {
-        return {
-          id: app,
-          name: db[group][app].name
-        }
-      })
-      const message = engine.render('apps.njk', { apps })
-      client.post(group, message)
-      return
-    }
+  const group = data.group_id
+  db[group] = db[group] || {}
 
-    // ios add
-    let match = data.text.match(/^ios add ([a-z0-9]+)$/)
-    if (match !== null) {
-      const app = RINGCENTRAL_APPS[match[1]] || match[1]
-      const reviews = await getReviews(app)
-      const name = reviews[0]['im:name'].label
-      db[group][app] = { name, reviews: reviews.slice(1) }
-      monitors[group] = monitors[group] || {}
-      if (monitors[group][app]) {
-        monitors[group][app].stop()
-        delete monitors[group][app]
+  // ios list
+  if (data.text === 'ios list') {
+    const apps = Object.keys(db[group]).map((app) => {
+      return {
+        id: app,
+        name: db[group][app].name
       }
-      monitors[group][app] = new CronJob('0 */10 * * * *', () => {
-        cronJob(group, app)
-      })
-      monitors[group][app].start()
-      client.post(group, 'done')
-      saveDb(db)
-      return
-    }
+    })
+    const message = engine.render('apps.njk', { apps })
+    client.post(group, message)
+    return
+  }
 
-    // ios remove
-    match = data.text.match(/^ios remove ([a-z0-9]+)$/)
-    if (match !== null) {
-      const app = RINGCENTRAL_APPS[match[1]] || match[1]
-      delete db[group][app]
+  // ios add
+  let match = data.text.match(/^ios add ([a-z0-9]+)$/)
+  if (match !== null) {
+    const app = RINGCENTRAL_APPS[match[1]] || match[1]
+    const reviews = await getReviews(app)
+    const name = reviews[0]['im:name'].label
+    db[group][app] = { name, reviews: reviews.slice(1) }
+    monitors[group] = monitors[group] || {}
+    if (monitors[group][app]) {
       monitors[group][app].stop()
       delete monitors[group][app]
-      client.post(group, 'done')
-      saveDb(db)
-      return
     }
+    monitors[group][app] = new CronJob('0 */10 * * * *', () => {
+      cronJob(group, app)
+    })
+    monitors[group][app].start()
+    client.post(group, 'done')
+    saveDb(db)
+    return
+  }
 
-    // ios reviews
-    match = data.text.match(/^ios ([a-z0-9]+) reviews$/)
-    if (match !== null) {
-      const app = RINGCENTRAL_APPS[match[1]] || match[1]
-      const reviews = db[group][app].reviews.map((review) => {
-        return {
-          title: review.title.label.trim(),
-          stars: parseInt(review['im:rating'].label.trim()),
-          author: review.author.name.label
-        }
-      })
-      const message = engine.render('reviews.njk', { reviews, name: db[group][app].name })
-      client.post(group, message)
-      return
-    }
+  // ios remove
+  match = data.text.match(/^ios remove ([a-z0-9]+)$/)
+  if (match !== null) {
+    const app = RINGCENTRAL_APPS[match[1]] || match[1]
+    delete db[group][app]
+    monitors[group][app].stop()
+    delete monitors[group][app]
+    client.post(group, 'done')
+    saveDb(db)
+    return
+  }
 
-    // ios review
-    match = data.text.match(/^ios ([a-z0-9]+) review (\d+)$/)
-    if (match !== null) {
-      const app = RINGCENTRAL_APPS[match[1]] || match[1]
-      const number = parseInt(match[2])
-      notifyReview(group, app, number, false)
-    }
+  // ios reviews
+  match = data.text.match(/^ios ([a-z0-9]+) reviews$/)
+  if (match !== null) {
+    const app = RINGCENTRAL_APPS[match[1]] || match[1]
+    const reviews = db[group][app].reviews.map((review) => {
+      return {
+        title: review.title.label.trim(),
+        stars: parseInt(review['im:rating'].label.trim()),
+        author: review.author.name.label
+      }
+    })
+    const message = engine.render('reviews.njk', { reviews, name: db[group][app].name })
+    client.post(group, message)
+    return
+  }
+
+  // ios review
+  match = data.text.match(/^ios ([a-z0-9]+) review (\d+)$/)
+  if (match !== null) {
+    const app = RINGCENTRAL_APPS[match[1]] || match[1]
+    const number = parseInt(match[2])
+    notifyReview(group, app, number, false)
   }
 })
