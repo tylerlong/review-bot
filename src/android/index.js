@@ -4,7 +4,7 @@ const client = require('../common/glip')
 const engine = require('../common/nunjucks')
 const { loadDb, saveDb } = require('./db')
 const { getReviews } = require('./spider')
-const { compareReviews } = require('./util')
+const { compareReviews, mergeReviews } = require('./util')
 
 const RINGCENTRAL_APPS = {
   glip: 'com.glip.mobile',
@@ -31,7 +31,7 @@ const notifyReview = (group, app, number, isNew) => {
 const cronJob = async (group, app) => {
   let reviews = await getReviews(app)
   const delta = compareReviews(db[group][app].reviews, reviews)
-  db[group][app].reviews = reviews
+  db[group][app].reviews = mergeReviews(db[group][app].reviews, reviews)
   delta.forEach((number) => {
     notifyReview(group, app, number, true)
   })

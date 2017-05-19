@@ -27,4 +27,3 @@ yarn start
 
 - Write tests!
 - catch exceptions, such as index out of array.
-- save all the reviews in db, because API only shows reviews for the recent week
