@@ -55,7 +55,7 @@ client.on('message', async (type, data) => {
   db[group] = db[group] || {}
 
   // ios list
-  if (data.text === 'ios list') {
+  if (data.text === 'review ios list') {
     const apps = Object.keys(db[group]).map((app) => {
       return {
         id: app,
@@ -68,7 +68,7 @@ client.on('message', async (type, data) => {
   }
 
   // ios add
-  let match = data.text.match(/^ios add ([a-z0-9]+)$/)
+  let match = data.text.match(/^review ios add ([a-z0-9]+)$/)
   if (match !== null) {
     const app = RINGCENTRAL_APPS[match[1]] || match[1]
     const reviews = await getReviews(app)
@@ -91,7 +91,7 @@ client.on('message', async (type, data) => {
   }
 
   // ios remove
-  match = data.text.match(/^ios remove ([a-z0-9]+)$/)
+  match = data.text.match(/^review ios remove ([a-z0-9]+)$/)
   if (match !== null) {
     const app = RINGCENTRAL_APPS[match[1]] || match[1]
     delete db[group][app]
@@ -103,7 +103,7 @@ client.on('message', async (type, data) => {
   }
 
   // ios reviews
-  match = data.text.match(/^ios ([a-z0-9]+) reviews$/)
+  match = data.text.match(/^review ios ([a-z0-9]+) reviews$/)
   if (match !== null) {
     const app = RINGCENTRAL_APPS[match[1]] || match[1]
     const reviews = db[group][app].reviews.map((review) => {
@@ -119,7 +119,7 @@ client.on('message', async (type, data) => {
   }
 
   // ios review
-  match = data.text.match(/^ios ([a-z0-9]+) review (\d+)$/)
+  match = data.text.match(/^review ios ([a-z0-9]+) review (\d+)$/)
   if (match !== null) {
     const app = RINGCENTRAL_APPS[match[1]] || match[1]
     const number = parseInt(match[2])

@@ -56,7 +56,7 @@ client.on('message', async (type, data) => {
   db[group] = db[group] || {}
 
   // android list
-  if (data.text === 'android list') {
+  if (data.text === 'review android list') {
     const apps = Object.keys(db[group]).map((app) => {
       return {
         name: db[group][app].name
@@ -68,7 +68,7 @@ client.on('message', async (type, data) => {
   }
 
   // android add
-  let match = data.text.match(/^android add ([a-z0-9.]+)$/)
+  let match = data.text.match(/^review android add ([a-z0-9.]+)$/)
   if (match !== null) {
     const app = RINGCENTRAL_APPS[match[1]] || match[1]
     const reviews = await getReviews(app)
@@ -90,7 +90,7 @@ client.on('message', async (type, data) => {
   }
 
   // android remove
-  match = data.text.match(/^android remove ([a-z0-9.]+)$/)
+  match = data.text.match(/^review android remove ([a-z0-9.]+)$/)
   if (match !== null) {
     const app = RINGCENTRAL_APPS[match[1]] || match[1]
     delete db[group][app]
@@ -102,7 +102,7 @@ client.on('message', async (type, data) => {
   }
 
   // android reviews
-  match = data.text.match(/^android ([a-z0-9.]+) reviews$/)
+  match = data.text.match(/^review android ([a-z0-9.]+) reviews$/)
   if (match !== null) {
     const app = RINGCENTRAL_APPS[match[1]] || match[1]
     const reviews = db[group][app].reviews.map((review) => {
@@ -121,7 +121,7 @@ client.on('message', async (type, data) => {
   }
 
   // android review
-  match = data.text.match(/^android ([a-z0-9.]+) review (\d+)$/)
+  match = data.text.match(/^review android ([a-z0-9.]+) review (\d+)$/)
   if (match !== null) {
     const app = RINGCENTRAL_APPS[match[1]] || match[1]
     const number = parseInt(match[2])
