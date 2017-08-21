@@ -1,3 +1,3 @@
 require('dotenv').config()
-require('./ios/index')
-require('./android/index')
+require('./review/ios/index')
+require('./review/android/index')
