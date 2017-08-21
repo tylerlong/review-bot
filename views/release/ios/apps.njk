@@ -1,0 +1,8 @@
+{% if apps|length %}
+Currently the following **iOS** apps are being release-monitored for this group:
+{% for app in apps %}
+* {{ app.id }} - {{ app.name }}
+{% endfor %}
+{% else %}
+Currently no **iOS** app is being release-monitored for this group.
+{% endif %}
