@@ -1,6 +1,6 @@
 const { CronJob } = require('cron')
 
-const client = require('../common/glip')
+const client = require('../../common/glip')
 const engine = require('../common/nunjucks')
 const { loadDb, saveDb } = require('./db')
 const { getReviews } = require('./spider')

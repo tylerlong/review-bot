@@ -1,4 +1,4 @@
-const commonDb = require('../common/db')
+const commonDb = require('../../common/db')
 
 const loadDb = () => {
   return commonDb.loadDb('review/ios')
