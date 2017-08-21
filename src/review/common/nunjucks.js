@@ -1,10 +1,5 @@
-const nunjucks = require('nunjucks')
-const path = require('path')
+const getEngine = require('../../common/nunjucks')
 
-const engine = nunjucks.configure(path.join(__dirname, '../../../views/review'), {
-  autoescape: false,
-  trimBlocks: true,
-  lstripBlocks: true
-})
+const engine = getEngine('review')
 
 module.exports = engine
