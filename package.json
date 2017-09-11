@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node src/index.js",
-    "upgrade": "ncu -ua && yarn upgrade"
+    "upgrade": "yarn upgrade --latest"
   },
   "repository": "git@github.com:tylerlong/review-bot.git",
   "author": "Tyler Long <tyler4long@gmail.com>",
@@ -15,13 +15,12 @@
     "cron": "^1.2.1",
     "dotenv": "^4.0.0",
     "glip.socket.io": "tylerlong/glip.socket.io",
-    "googleapis": "^19.0.0",
-    "nunjucks": "^3.0.0",
+    "googleapis": "^21.3.0",
+    "nunjucks": "^3.0.1",
     "request": "^2.81.0",
     "request-promise": "^4.2.1"
   },
   "devDependencies": {
-    "npm-check-updates": "^2.11.1",
-    "standard": "^10.0.2"
+    "standard": "^10.0.3"
   }
 }
