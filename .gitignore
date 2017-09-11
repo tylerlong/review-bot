@@ -1,5 +1,6 @@
 node_modules/
 .env
-db.json
 key.json
 db/*.json
+db/release/*.json
+db/review/*.json
