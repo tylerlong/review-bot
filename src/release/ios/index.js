@@ -32,7 +32,7 @@ const cronJob = async (group, app) => {
   }
   const name = appInfo.trackName
   const version = appInfo.version
-  const releaseDate = appInfo.releaseDate
+  const releaseDate = appInfo.currentVersionReleaseDate
   if (db[group][app].version !== version) {
     client.post(group, `**iOS** app ${name} ${version} was released at ${releaseDate}`)
     db[group][app] = { name, version, releaseDate }
@@ -81,7 +81,7 @@ client.on('message', async (type, data) => {
     }
     const name = appInfo.trackName
     const version = appInfo.version
-    const releaseDate = appInfo.releaseDate
+    const releaseDate = appInfo.currentVersionReleaseDate
     db[group][app] = { name, version, releaseDate }
 
     monitors[group] = monitors[group] || {}
