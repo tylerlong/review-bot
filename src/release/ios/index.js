@@ -34,7 +34,7 @@ const cronJob = async (group, app) => {
   const version = appInfo.version
   const releaseDate = appInfo.releaseDate
   if (db[group][app].version !== version) {
-    client.post(group, `iOS app ${name} ${version} was released at ${releaseDate}`)
+    client.post(group, `**iOS** app ${name} ${version} was released at ${releaseDate}`)
     db[group][app] = { name, version, releaseDate }
   }
   saveDb(db)
@@ -58,7 +58,7 @@ client.on('message', async (type, data) => {
   db[group] = db[group] || {}
 
   // ios list
-  if (data.text === 'release ios list') {
+  if (data.text.match(/^release ios list$/i)) {
     const apps = Object.keys(db[group]).map(app => {
       return {
         id: app,
@@ -71,7 +71,7 @@ client.on('message', async (type, data) => {
   }
 
   // ios add
-  let match = data.text.match(/^release ios add (.+?)$/)
+  let match = data.text.match(/^release ios add (.+?)$/i)
   if (match !== null) {
     const app = match[1].trim()
     const appInfo = await lookup(app)
@@ -100,7 +100,7 @@ client.on('message', async (type, data) => {
   }
 
   // ios remove
-  match = data.text.match(/^release ios remove (.+?)$/)
+  match = data.text.match(/^release ios remove (.+?)$/i)
   if (match !== null) {
     const app = match[1].trim()
     delete db[group][app]
@@ -112,12 +112,12 @@ client.on('message', async (type, data) => {
   }
 
   // ios release
-  match = data.text.match(/^release ios ([a-z0-9]+)$/)
+  match = data.text.match(/^release ios (.+?)$/i)
   if (match !== null) {
     const app = match[1].trim()
     const appInfo = db[group][app]
     if (appInfo) {
-      client.post(group, `iOS app ${appInfo.name} ${appInfo.version} was released at ${appInfo.releaseDate}`)
+      client.post(group, `**iOS** app ${appInfo.name} ${appInfo.version} was released at ${appInfo.releaseDate}`)
     } else {
       client.post(group, `We don't monitor this app: ${app}`)
     }
