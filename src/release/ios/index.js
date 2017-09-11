@@ -30,10 +30,15 @@ const monitors = {}
 
 const cronJob = async (group, app) => {
   let appInfo = await lookup(app)
-  // todo:
-  // compare release number
-  // send notification to Glip
-  // save latest release number to db
+  if (appInfo === null) { // invalid app
+    return
+  }
+  const name = appInfo.trackName
+  const version = appInfo.version
+  if (db[group][app].version !== version) {
+    client.post(group, `${name} ${version} has been released`)
+    db[group][app] = { name, version }
+  }
   saveDb(db)
 }
 
@@ -73,16 +78,20 @@ client.on('message', async (type, data) => {
   if (match !== null) {
     const app = match[1].trim()
     const appInfo = await lookup(app)
-    const name = appInfo[0]['im:name'].label
-    const latestRelease = appInfo['latestRelease']
-    db[group][app] = { name, latestRelease }
+    if (appInfo === null) { // invalid app
+      client.post(group, `Invalid app ID: ${app}`)
+      return
+    }
+    const name = appInfo.trackName
+    const version = appInfo.version
+    db[group][app] = { name, version }
 
     monitors[group] = monitors[group] || {}
     if (monitors[group][app]) {
       monitors[group][app].stop()
       delete monitors[group][app]
     }
-    monitors[group][app] = new CronJob('0 */10 * * * *', () => {
+    monitors[group][app] = new CronJob('0 */30 * * * *', () => {
       cronJob(group, app)
     })
     monitors[group][app].start()
@@ -108,6 +117,11 @@ client.on('message', async (type, data) => {
   match = data.text.match(/^release ios ([a-z0-9]+)$/)
   if (match !== null) {
     const app = match[1].trim()
-    // todo: send release number to Glip
+    const appInfo = db[group][app]
+    if (appInfo) {
+      client.post(group, `${appInfo.name} ${appInfo.version}`)
+    } else {
+      client.post(group, `We don't monitor this app: ${app}`)
+    }
   }
 })
