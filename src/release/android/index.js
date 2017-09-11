@@ -7,13 +7,13 @@ const { lookup } = require('./spider')
 
 /*
 - ATT:
-https://play.google.com/store/apps/details?id=com.attofficeathand.android&hl=en_GB
+https://play.google.com/store/apps/details?id=com.attofficeathand.android&hl=en_US
 
 - BT:
-https://play.google.com/store/apps/details?id=com.bt.cloudphone&hl=en_GB
+https://play.google.com/store/apps/details?id=com.bt.cloudphone&hl=en_US
 
 - TELUS:
-https://play.google.com/store/apps/details?id=com.telusvoip.android&hl=en
+https://play.google.com/store/apps/details?id=com.telusvoip.android&hl=en_US
 */
 
 const db = loadDb()

@@ -3,7 +3,7 @@ const cheerio = require('cheerio')
 
 const lookup = async (id) => {
   try {
-    const body = await rp(`https://play.google.com/store/apps/details?id=${id}`)
+    const body = await rp(`https://play.google.com/store/apps/details?id=${id}&hl=en_US`)
     const $ = cheerio.load(body)
     const name = $('div.id-app-title').text().trim()
     const releaseDate = $('div[itemprop="datePublished"]').text().trim()
