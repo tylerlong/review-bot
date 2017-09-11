@@ -6,7 +6,6 @@ const { loadDb, saveDb } = require('./db')
 const { lookup } = require('./spider')
 
 /*
-
 ATT app:
 - https://itunes.apple.com/us/app/ringcentral-office-hand-from-at-t/id398089358?mt=8
 - ID = 398089358
@@ -21,13 +20,11 @@ TELUS Business Connect
 - https://itunes.apple.com/ca/app/telus-business-connect/id925058301?mt=8
 - ID = 925058301
 http://itunes.apple.com/lookup?id=925058301
-
 */
 
 const db = loadDb()
 
 const monitors = {}
-
 const cronJob = async (group, app) => {
   let appInfo = await lookup(app)
   if (appInfo === null) { // invalid app
@@ -35,13 +32,13 @@ const cronJob = async (group, app) => {
   }
   const name = appInfo.trackName
   const version = appInfo.version
+  const releaseDate = appInfo.releaseDate
   if (db[group][app].version !== version) {
-    client.post(group, `${name} ${version} has been released`)
-    db[group][app] = { name, version }
+    client.post(group, `iOS app ${name} ${version} was released at ${releaseDate}`)
+    db[group][app] = { name, version, releaseDate }
   }
   saveDb(db)
 }
-
 Object.keys(db).forEach((group) => {
   monitors[group] = {}
   Object.keys(db[group]).forEach((app) => {
@@ -62,7 +59,7 @@ client.on('message', async (type, data) => {
 
   // ios list
   if (data.text === 'release ios list') {
-    const apps = Object.keys(db[group]).map((app) => {
+    const apps = Object.keys(db[group]).map(app => {
       return {
         id: app,
         name: db[group][app].name
@@ -84,7 +81,8 @@ client.on('message', async (type, data) => {
     }
     const name = appInfo.trackName
     const version = appInfo.version
-    db[group][app] = { name, version }
+    const releaseDate = appInfo.releaseDate
+    db[group][app] = { name, version, releaseDate }
 
     monitors[group] = monitors[group] || {}
     if (monitors[group][app]) {
@@ -119,7 +117,7 @@ client.on('message', async (type, data) => {
     const app = match[1].trim()
     const appInfo = db[group][app]
     if (appInfo) {
-      client.post(group, `${appInfo.name} ${appInfo.version}`)
+      client.post(group, `iOS app ${appInfo.name} ${appInfo.version} was released at ${appInfo.releaseDate}`)
     } else {
       client.post(group, `We don't monitor this app: ${app}`)
     }
