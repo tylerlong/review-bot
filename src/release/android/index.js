@@ -28,7 +28,7 @@ const cronJob = async (group, app) => {
   const version = appInfo.version
   const releaseDate = appInfo.releaseDate
   if (db[group][app].version !== version) {
-    client.post(group, `**Android** app ${name} **${version}** was released at ${releaseDate}`)
+    client.post(group, `**Android** app ${name} **${version}** was released on ${releaseDate}`)
     db[group][app] = { name, version, releaseDate }
   }
   saveDb(db)
@@ -111,7 +111,7 @@ client.on('message', async (type, data) => {
     const app = match[1].trim()
     const appInfo = db[group][app]
     if (appInfo) {
-      client.post(group, `**Android** app ${appInfo.name} **${appInfo.version}** was released at ${appInfo.releaseDate}`)
+      client.post(group, `**Android** app ${appInfo.name} **${appInfo.version}** was released on ${appInfo.releaseDate}`)
     } else {
       client.post(group, `We don't monitor this app: ${app}`)
     }
