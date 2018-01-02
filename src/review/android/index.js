@@ -106,7 +106,7 @@ client.on('message', async (type, data) => {
   // android reviews
   match = data.text.match(/^review android ([a-z0-9.]+) reviews$/)
   if (match !== null) {
-    const app = ANDRIOD_PRESET_APPS[match[1]] || PEER_APPS[match[1]] || match[1]
+    const app = ANDRIOD_PRESET_APPS[match[1]] || match[1]
     const reviews = db[group][app].reviews.map(review => {
       const deviceMetadata = review.comments[0].userComment.deviceMetadata
       const device = deviceMetadata
