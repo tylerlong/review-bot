@@ -32,8 +32,8 @@ const notifyReview = (group, app, number, isNew) => {
 const cronJob = async (group, app) => {
   let reviewCollections = await getReviews(app)
   reviewCollections.forEach(i => i && i.shift())
-  var oldReviews = db[group][app].reviews
   for (let index in reviewCollections) {
+    let oldReviews = db[group][app].reviews
     let reviews = reviewCollections[index]
     const delta = compareReviews(oldReviews, reviews)
     db[group][app].reviews = mergeReviews(oldReviews, reviews)
