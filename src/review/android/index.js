@@ -12,15 +12,10 @@ const monitors = {}
 
 const notifyReview = (group, app, number = 1, isNew) => {
   const entry = db[group][app].reviews[number - 1]
-  const deviceMetadata = entry.comments[0].userComment.deviceMetadata
-  const device = deviceMetadata
-    ? `${deviceMetadata.manufacturer} ${deviceMetadata.productName}`
-    : 'Unknown device'
   const review = {
-    text: entry.comments[0].userComment.text.trim(),
-    stars: entry.comments[0].userComment.starRating,
-    device,
-    author: entry.authorName === '' ? 'Unknown user' : entry.authorName
+    text: entry.content.trim(),
+    stars: entry.rating,
+    author: entry.author || 'Unknown user'
   }
   const message = engine.render('android/review.njk', {
     number,
@@ -70,7 +65,7 @@ client.on('message', async (type, data) => {
   }
 
   // android add
-  let match = data.text.match(/^review android add ([a-z0-9.]+)$/)
+  let match = data.text.match(/^review android add ([a-z0-9.]+)$/i)
   if (match !== null) {
     const app = ANDRIOD_PRESET_APPS[match[1]] || match[1]
     const reviews = await getReviews(app)
@@ -92,7 +87,7 @@ client.on('message', async (type, data) => {
   }
 
   // android remove
-  match = data.text.match(/^review android remove ([a-z0-9.]+)$/)
+  match = data.text.match(/^review android remove ([a-z0-9.]+)$/i)
   if (match !== null) {
     const app = ANDRIOD_PRESET_APPS[match[1]] || match[1]
     delete db[group][app]
@@ -104,20 +99,14 @@ client.on('message', async (type, data) => {
   }
 
   // android reviews
-  match = data.text.match(/^review android ([a-z0-9.]+) reviews$/)
+  match = data.text.match(/^review android ([a-z0-9.]+) reviews$/i)
   if (match !== null) {
     const app = ANDRIOD_PRESET_APPS[match[1]] || match[1]
     const reviews = db[group][app].reviews.map(review => {
-      const deviceMetadata = review.comments[0].userComment.deviceMetadata
-      const device = deviceMetadata
-        ? `${deviceMetadata.manufacturer} ${deviceMetadata.productName}`
-        : 'Unknown device'
       return {
-        title:
-          review.comments[0].userComment.text.trim().substring(0, 40) + '...',
-        stars: review.comments[0].userComment.starRating,
-        device,
-        author: review.authorName === '' ? 'Unknown user' : review.authorName
+        title: review.content.trim().substring(0, 40) + '...',
+        stars: review.rating,
+        author: review.author || 'Unknown user'
       }
     })
     const message = engine.render('android/reviews.njk', {
@@ -129,7 +118,7 @@ client.on('message', async (type, data) => {
   }
 
   // android review
-  match = data.text.match(/^review android ([a-z0-9.]+) review (\d+)$/)
+  match = data.text.match(/^review android ([a-z0-9.]+) review (\d+)$/i)
   if (match !== null) {
     const app = ANDRIOD_PRESET_APPS[match[1]] || match[1]
     const number = parseInt(match[2])

@@ -2,7 +2,7 @@
 
 {% if reviews|length %}
 {% for review in reviews %}
-#{{ loop.index }} - {% include 'common/stars.njk' %} - {{ review.author }} - {{ review.title }} - {{ review.device }}
+#{{ loop.index }} - {% include 'common/stars.njk' %} - {{ review.author }} - {{ review.title }}
 {% endfor %}
 {% else %}
 There are no reviews for this Andriod app.
