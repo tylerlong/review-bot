@@ -4,7 +4,6 @@ Glip bot to monitor app reviews.
 
 Both iOS App Store and Google Play store are supported.
 
-
 ## Setup
 
 ```
@@ -12,16 +11,14 @@ yarn install
 cp .env.sample .env
 edit .env
 
-Save your Google service account credentials into `src/android/key.json`.
+Save your [Appfollow](https://appfollow.io/) service account credentials into `src/review/android/appfollow.json`.
 ```
-
 
 ## Run
 
 ```
 yarn start
 ```
-
 
 ## Usage
 
@@ -57,13 +54,9 @@ review ios/android <app_id> reviews
 review ios/android <app_id> review <index>
 ```
 
-
 ### Releases
-
-
-
 
 ## Todo
 
-- Write tests!
-- catch exceptions, such as index out of array.
+* Write tests!
+* catch exceptions, such as index out of array.

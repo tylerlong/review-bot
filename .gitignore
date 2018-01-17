@@ -1,6 +1,6 @@
 node_modules/
 .env
-key.json
+appfollow.json
 db/*.json
 db/release/*.json
 db/review/*.json
